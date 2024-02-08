@@ -1,25 +1,37 @@
 package main
 
 import (
+	"atnidirtysleng/db"
+	"atnidirtysleng/handlers"
 	"context"
+	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"atnidirtysleng/db"
-	"atnidirtysleng/handlers"
-
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	err := godotenv.Load()
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
+	}
+
+	m, err := migrate.New(
+		"file://migrations",
+		"postgres://postgres:228@localhost:5432/postgres?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := m.Up(); err != nil {
+		log.Fatal(err)
 	}
 
 	databaseURL := os.Getenv("DATABASE_URL")
