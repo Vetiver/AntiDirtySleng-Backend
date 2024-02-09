@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"atnidirtysleng/db"
 	"atnidirtysleng/handlers"
@@ -10,7 +11,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"

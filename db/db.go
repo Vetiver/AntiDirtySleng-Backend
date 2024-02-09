@@ -13,6 +13,7 @@ import (
 type DB struct {
 	pool *pgxpool.Pool
 }
+
 type User struct {
 	UserId      int `json:"id"`
 	Username    string    `json:"name"     binding:"required"`
@@ -38,6 +39,7 @@ func NewDB(pool *pgxpool.Pool) *DB {
 		pool: pool,
 	}
 }
+
 
 func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -83,6 +85,7 @@ func (db DB) RegisterUser(userData User) (*User, error) {
 }
 
 func (db DB) userExists(userID int) (bool, error) {
+  
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
 		return false, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -99,6 +102,7 @@ func (db DB) userExists(userID int) (bool, error) {
 
 	return exists, nil
 }
+
 
 func (db DB) GetAllUsers(userID int) ([]User, error) {
     exists, err := db.userExists(userID)
