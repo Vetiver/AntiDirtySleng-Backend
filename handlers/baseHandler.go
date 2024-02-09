@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"atnidirtysleng/db"
-	"os"
 	"github.com/dgrijalva/jwt-go"
+	"os"
 )
+
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+
 type UserGet struct {
 	Parce []db.User `json:"parce"`
 }

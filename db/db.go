@@ -3,9 +3,11 @@ package db
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"os"
+	"math/rand"
+	"time"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DB struct {
@@ -13,7 +15,7 @@ type DB struct {
 }
 
 type User struct {
-	UserId      uuid.UUID `json:"id"`
+	UserId      int `json:"id"`
 	Username    string    `json:"name"     binding:"required"`
 	IsAdmin     bool      `json:"isAdmin"`
 	Email       string    `json:"email"    binding:"required"`
@@ -39,6 +41,15 @@ func NewDB(pool *pgxpool.Pool) *DB {
 }
 
 
+func hashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
+}
+
+
 func DbStart(baseUrl string) *pgxpool.Pool {
 	urlExample := baseUrl
 	dbpool, err := pgxpool.New(context.Background(), string(urlExample))
@@ -49,7 +60,32 @@ func DbStart(baseUrl string) *pgxpool.Pool {
 	return dbpool
 }
 
-func (db DB) userExists(userID uuid.UUID) (bool, error) {
+func (db DB) RegisterUser(userData User) (*User, error) {
+	conn, err := db.pool.Acquire(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+	}
+	defer conn.Release()
+
+	rand.Seed(time.Now().UnixNano()) 
+	userData.UserId = rand.Intn(100000)
+	password, hashErr := hashPassword(userData.Password)
+	if hashErr != nil {
+		return nil, fmt.Errorf("unable to hashPass: %v", hashErr)
+	}
+
+	err = conn.QueryRow(context.Background(),
+		`INSERT INTO users(userid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING userid`,
+		userData.UserId, userData.Username, userData.Email, password).Scan(&userData.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("unable to INSERT: %v", err)
+	}
+
+	return &userData, nil
+}
+
+func (db DB) userExists(userID int) (bool, error) {
+  
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
 		return false, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -67,14 +103,15 @@ func (db DB) userExists(userID uuid.UUID) (bool, error) {
 	return exists, nil
 }
 
-func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
+
+func (db DB) GetAllUsers(userID int) ([]User, error) {
     exists, err := db.userExists(userID)
     if err != nil {
         return nil, err
     }
 
     if exists == false {
-        return nil, fmt.Errorf("user with ID %s does not exist", userID.String())
+        return nil, fmt.Errorf("user with ID %s does not exist", userID)
     }
 
     conn, err := db.pool.Acquire(context.Background())

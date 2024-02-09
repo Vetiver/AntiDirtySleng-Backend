@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"atnidirtysleng/db"
 	"atnidirtysleng/handlers"
@@ -10,7 +11,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -46,18 +46,18 @@ func main() {
 	r.GET("/getAllUsers", func(c *gin.Context) {
 		handler.GetAllUsers(c)
 	})
-	// v1 := r.Group("/user")
-	// {
-	// 	v1.POST("/sendMail", func(c *gin.Context) {
-	// 		handler.SendMail(c)
-	// 	})
-	// 	v1.POST("/regiter", func(c *gin.Context) {
-	// 		handler.RegisterUser(c)
-	// 	})
-	// 	v1.GET("/login", func(c *gin.Context) {
-	// 		handler.LoginUser(c)
-	// 	})
-	// }
+	v1 := r.Group("/auth")
+	{
+		v1.POST("/sendMail", func(c *gin.Context) {
+			handler.SendMail(c)
+		})
+		v1.POST("/register", func(c *gin.Context) {
+			handler.RegisterUser(c)
+		})
+		// v1.GET("/login", func(c *gin.Context) {
+		// 	handler.LoginUser(c)
+		// })
+	}
 
 	srv := &http.Server{
 		Addr:    ":8080",
