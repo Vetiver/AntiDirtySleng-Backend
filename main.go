@@ -51,9 +51,9 @@ func main() {
 		v1.POST("/sendMail", func(c *gin.Context) {
 			handler.SendMail(c)
 		})
-		// v1.POST("/regiter", func(c *gin.Context) {
-		// 	handler.RegisterUser(c)
-		// })
+		v1.POST("/register", func(c *gin.Context) {
+			handler.RegisterUser(c)
+		})
 		// v1.GET("/login", func(c *gin.Context) {
 		// 	handler.LoginUser(c)
 		// })
