@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"atnidirtysleng/db"
 	"atnidirtysleng/handlers"
@@ -11,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -23,7 +23,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
 
 	m, err := migrate.New(
 		"file://migrations",
@@ -54,9 +53,9 @@ func main() {
 		v1.POST("/register", func(c *gin.Context) {
 			handler.RegisterUser(c)
 		})
-		// v1.GET("/login", func(c *gin.Context) {
-		// 	handler.LoginUser(c)
-		// })
+		v1.GET("/login", func(c *gin.Context) {
+			handler.LoginUser(c)
+		})
 	}
 
 	srv := &http.Server{
