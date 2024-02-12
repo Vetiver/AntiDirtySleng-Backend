@@ -53,9 +53,9 @@ func main() {
 		v1.POST("/register", func(c *gin.Context) {
 			handler.RegisterUser(c)
 		})
-		v1.GET("/login", func(c *gin.Context) {
-			handler.LoginUser(c)
-		})
+		// v1.GET("/login", func(c *gin.Context) {
+		// 	handler.LoginUser(c)
+		// })
 	}
 
 	srv := &http.Server{

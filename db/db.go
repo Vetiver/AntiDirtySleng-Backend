@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"math/rand"
-	"time"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,7 +14,7 @@ type DB struct {
 }
 
 type User struct {
-	UserId      int `json:"id"`
+	UserId      uuid.UUID `json:"id"`
 	Username    string    `json:"name"     binding:"required"`
 	IsAdmin     bool      `json:"isAdmin"`
 	Email       string    `json:"email"    binding:"required"`
@@ -67,8 +66,7 @@ func (db DB) RegisterUser(userData User) (*User, error) {
 	}
 	defer conn.Release()
 
-	rand.Seed(time.Now().UnixNano()) 
-	userData.UserId = rand.Intn(100000)
+	userData.UserId = uuid.New()
 	password, hashErr := hashPassword(userData.Password)
 	if hashErr != nil {
 		return nil, fmt.Errorf("unable to hashPass: %v", hashErr)
