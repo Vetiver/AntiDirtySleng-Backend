@@ -6,10 +6,14 @@ import (
 )
 
 func createJWTToken(id uuid.UUID) (string, error) {
-	JWTToken := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, jwt.MapClaims{
 
 		"id": id,
 	})
 
-	JWTTokenString
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
