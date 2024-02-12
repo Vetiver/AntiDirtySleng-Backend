@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
@@ -39,7 +40,6 @@ func NewDB(pool *pgxpool.Pool) *DB {
 	}
 }
 
-
 func hashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -47,7 +47,6 @@ func hashPassword(password string) (string, error) {
 	}
 	return string(hashedPassword), nil
 }
-
 
 func DbStart(baseUrl string) *pgxpool.Pool {
 	urlExample := baseUrl
@@ -82,8 +81,25 @@ func (db DB) RegisterUser(userData User) (*User, error) {
 	return &userData, nil
 }
 
+func (db DB) GetUserByEmail(email string) (*User, error) {
+	conn, err := db.pool.Acquire(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+	}
+	defer conn.Release()
+
+	var user User
+	err = conn.QueryRow(context.Background(), "SELECT userid, username, isadmin, email, password FROM users WHERE email = $1", email).
+		Scan(&user.UserId, &user.Username, &user.IsAdmin, &user.Email, &user.Password)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve user: %v", err)
+	}
+
+	return &user, err
+}
+
 func (db DB) userExists(userID int) (bool, error) {
-  
+
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
 		return false, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -101,38 +117,37 @@ func (db DB) userExists(userID int) (bool, error) {
 	return exists, nil
 }
 
-
 func (db DB) GetAllUsers(userID int) ([]User, error) {
-    exists, err := db.userExists(userID)
-    if err != nil {
-        return nil, err
-    }
+	exists, err := db.userExists(userID)
+	if err != nil {
+		return nil, err
+	}
 
-    if exists == false {
-        return nil, fmt.Errorf("user with ID %s does not exist", userID)
-    }
+	if exists == false {
+		return nil, fmt.Errorf("user with ID %s does not exist", userID)
+	}
 
-    conn, err := db.pool.Acquire(context.Background())
-    if err != nil {
-        return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
-    }
-    defer conn.Release()
+	conn, err := db.pool.Acquire(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+	}
+	defer conn.Release()
 
-    rows, err := conn.Query(context.Background(),
-        `SELECT id, name, email, description, avatar FROM users`)
-    if err != nil {
-        return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
-    }
-    defer rows.Close()
+	rows, err := conn.Query(context.Background(),
+		`SELECT id, name, email, description, avatar FROM users`)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
+	}
+	defer rows.Close()
 
-    var data []User
-    for rows.Next() {
-        var d User
-        err = rows.Scan(&d.UserId,&d.Username, &d.Email, &d.Description, &d.Avatar )
-        if err != nil {
-            return nil, fmt.Errorf("unable to scan row: %v", err)
-        }
-        data = append(data, d)
-    }
-    return data, err
+	var data []User
+	for rows.Next() {
+		var d User
+		err = rows.Scan(&d.UserId, &d.Username, &d.Email, &d.Description, &d.Avatar)
+		if err != nil {
+			return nil, fmt.Errorf("unable to scan row: %v", err)
+		}
+		data = append(data, d)
+	}
+	return data, err
 }
