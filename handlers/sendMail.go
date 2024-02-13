@@ -71,6 +71,8 @@ func (h *BaseHandler) sendConfirmationEmail(reqData *db.User, code int) (string)
 
 
 func (h *BaseHandler) SendMail(c *gin.Context) {
+	h.mu.Lock()
+    defer h.mu.Unlock()
 	var reqData *db.User
 	code := generateRandomCode()
 	if err := c.BindJSON(&reqData); err != nil {
@@ -78,7 +80,6 @@ func (h *BaseHandler) SendMail(c *gin.Context) {
 		return
 	}
 	jw := h.sendConfirmationEmail(reqData, code)
-
 	c.JSON(http.StatusOK, gin.H{
 		"result": jw,
 	})

@@ -4,6 +4,7 @@ import (
 	"atnidirtysleng/db"
 	"github.com/dgrijalva/jwt-go"
 	"os"
+	"sync"
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
@@ -15,6 +16,7 @@ type UserGet struct {
 type BaseHandler struct {
 	db   *db.DB
 	Code map[string]*db.User
+	mu   sync.Mutex
 }
 
 func NewBaseHandler(pool *db.DB) *BaseHandler {
