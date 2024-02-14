@@ -34,6 +34,10 @@ type Token struct {
 	TokenString string `json:"accessToken"`
 }
 
+type UserChangePassData struct {
+	Email string `json:"email" binding:"required"`
+}
+
 func NewDB(pool *pgxpool.Pool) *DB {
 	return &DB{
 		pool: pool,
