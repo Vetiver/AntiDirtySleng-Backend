@@ -98,7 +98,7 @@ func (db DB) GetUserByEmail(email string) (*User, error) {
 	return &user, err
 }
 
-func (db DB) userExists(userID int) (bool, error) {
+func (db DB) userExists(userID uuid.UUID) (bool, error) {
 
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
@@ -108,16 +108,16 @@ func (db DB) userExists(userID int) (bool, error) {
 
 	var exists bool
 	err = conn.QueryRow(context.Background(),
-		"SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)", userID).
+		"SELECT EXISTS (SELECT 1 FROM users WHERE userid = $1)", userID).
 		Scan(&exists)
 	if err != nil {
 		return false, fmt.Errorf("error checking user existence: %v", err)
 	}
 
-	return exists, nil
+	return exists, err
 }
 
-func (db DB) GetAllUsers(userID int) ([]User, error) {
+func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	exists, err := db.userExists(userID)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func (db DB) GetAllUsers(userID int) ([]User, error) {
 	defer conn.Release()
 
 	rows, err := conn.Query(context.Background(),
-		`SELECT id, name, email, description, avatar FROM users`)
+		`SELECT userid, username, email, description, avatar FROM users`)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}

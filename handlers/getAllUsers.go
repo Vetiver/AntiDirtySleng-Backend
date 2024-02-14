@@ -5,6 +5,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func (h BaseHandler) GetAllUsers(c *gin.Context) {
@@ -23,8 +24,12 @@ func (h BaseHandler) GetAllUsers(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный токен"})
 		return
 	}
-	userID := int(token.Claims.(jwt.MapClaims)["userid"].(int))
-	users, err := h.db.GetAllUsers(userID)
+	userid, err := uuid.Parse(token.Claims.(jwt.MapClaims)["userid"].(string))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ошибка при распарсе токена"})
+		return
+	}
+	users, err := h.db.GetAllUsers(userid)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Что-то пошло не так"})
 		return
