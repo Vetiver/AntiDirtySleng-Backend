@@ -58,6 +58,10 @@ func main() {
 		})
 	}
 
+	r.POST("/confirmEmail", func(c *gin.Context) {
+		handler.SendChangeMail(c)
+	})
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,
