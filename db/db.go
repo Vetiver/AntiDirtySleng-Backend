@@ -116,7 +116,7 @@ func (db DB) userExists(userID uuid.UUID) (bool, error) {
 	return exists, err
 }
 
-func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
+func (db DB) GetUserInfo(userID uuid.UUID) ([]User, error) {
 	exists, err := db.userExists(userID)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	defer conn.Release()
 
 	rows, err := conn.Query(context.Background(),
-		"SELECT userid, \"username\", \"email\", isadmin, description, avatar FROM users")
+		"SELECT userid, \"username\", \"email\", isadmin, description, avatar FROM users WHERE userid = $1", userID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}

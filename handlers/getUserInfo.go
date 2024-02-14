@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h BaseHandler) GetAllUsers(c *gin.Context) {
+func (h BaseHandler) GetUserInfo(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Отсутствует токен авторизации"})
@@ -30,7 +30,7 @@ func (h BaseHandler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	users, err := h.db.GetAllUsers(userID)
+	users, err := h.db.GetUserInfo(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err})
 		return
