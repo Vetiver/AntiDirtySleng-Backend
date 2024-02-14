@@ -42,8 +42,8 @@ func main() {
 	db := db.NewDB(pool)
 	handler := handlers.NewBaseHandler(db)
 	r := gin.Default()
-	r.GET("/getAllUsers", func(c *gin.Context) {
-		handler.GetAllUsers(c)
+	r.GET("/getUserInfo", func(c *gin.Context) {
+		handler.GetUserInfo(c)
 	})
 	v1 := r.Group("/auth")
 	{
