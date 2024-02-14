@@ -24,14 +24,15 @@ func (h BaseHandler) GetAllUsers(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверный токен"})
 		return
 	}
-	userid, err := uuid.Parse(token.Claims.(jwt.MapClaims)["userid"].(string))
+	userID, err := uuid.Parse(token.Claims.(jwt.MapClaims)["id"].(string))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Ошибка при распарсе токена"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при извлечении ID пользователя"})
 		return
 	}
-	users, err := h.db.GetAllUsers(userid)
+
+	users, err := h.db.GetAllUsers(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Что-то пошло не так"})
+		c.JSON(http.StatusNotFound, gin.H{"error": err})
 		return
 	}
 

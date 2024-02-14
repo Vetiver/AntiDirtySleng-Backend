@@ -20,8 +20,8 @@ type User struct {
 	IsAdmin     bool      `json:"isAdmin"`
 	Email       string    `json:"email"    binding:"required"`
 	Password    string    `json:"password" binding:"required,min=8"`
-	Description string    `json:"descriprion"`
-	Avatar      string    `json:"avatar"`
+	Description *string   `json:"descriprion"`
+	Avatar      *string   `json:"avatar"`
 	ConfirmCode int
 }
 
@@ -99,7 +99,6 @@ func (db DB) GetUserByEmail(email string) (*User, error) {
 }
 
 func (db DB) userExists(userID uuid.UUID) (bool, error) {
-
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
 		return false, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -124,7 +123,7 @@ func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	}
 
 	if exists == false {
-		return nil, fmt.Errorf("user with ID %s does not exist", userID)
+		return nil, fmt.Errorf("user with ID %s does not exist", userID.String())
 	}
 
 	conn, err := db.pool.Acquire(context.Background())
@@ -134,7 +133,7 @@ func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	defer conn.Release()
 
 	rows, err := conn.Query(context.Background(),
-		`SELECT userid, username, email, description, avatar FROM users`)
+		"SELECT userid, \"username\", \"email\", isadmin, description, avatar FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}
@@ -143,7 +142,7 @@ func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	var data []User
 	for rows.Next() {
 		var d User
-		err = rows.Scan(&d.UserId, &d.Username, &d.Email, &d.Description, &d.Avatar)
+		err = rows.Scan(&d.UserId, &d.Username, &d.Email, &d.IsAdmin, &d.Description, &d.Avatar)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan row: %v", err)
 		}
