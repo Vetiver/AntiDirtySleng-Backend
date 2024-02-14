@@ -20,8 +20,8 @@ type User struct {
 	IsAdmin     bool      `json:"isAdmin"`
 	Email       string    `json:"email"    binding:"required"`
 	Password    string    `json:"password" binding:"required,min=8"`
-	Description string    `json:"descriprion"`
-	Avatar      string    `json:"avatar"`
+	Description *string   `json:"descriprion"`
+	Avatar      *string   `json:"avatar"`
 	ConfirmCode int
 }
 
@@ -98,8 +98,7 @@ func (db DB) GetUserByEmail(email string) (*User, error) {
 	return &user, err
 }
 
-func (db DB) userExists(userID int) (bool, error) {
-
+func (db DB) userExists(userID uuid.UUID) (bool, error) {
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
 		return false, fmt.Errorf("unable to acquire a database connection: %v", err)
@@ -108,23 +107,23 @@ func (db DB) userExists(userID int) (bool, error) {
 
 	var exists bool
 	err = conn.QueryRow(context.Background(),
-		"SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)", userID).
+		"SELECT EXISTS (SELECT 1 FROM users WHERE userid = $1)", userID).
 		Scan(&exists)
 	if err != nil {
 		return false, fmt.Errorf("error checking user existence: %v", err)
 	}
 
-	return exists, nil
+	return exists, err
 }
 
-func (db DB) GetAllUsers(userID int) ([]User, error) {
+func (db DB) GetAllUsers(userID uuid.UUID) ([]User, error) {
 	exists, err := db.userExists(userID)
 	if err != nil {
 		return nil, err
 	}
 
 	if exists == false {
-		return nil, fmt.Errorf("user with ID %s does not exist", userID)
+		return nil, fmt.Errorf("user with ID %s does not exist", userID.String())
 	}
 
 	conn, err := db.pool.Acquire(context.Background())
@@ -134,7 +133,7 @@ func (db DB) GetAllUsers(userID int) ([]User, error) {
 	defer conn.Release()
 
 	rows, err := conn.Query(context.Background(),
-		`SELECT id, name, email, description, avatar FROM users`)
+		"SELECT userid, \"username\", \"email\", isadmin, description, avatar FROM users")
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve data from database: %v", err)
 	}
@@ -143,7 +142,7 @@ func (db DB) GetAllUsers(userID int) ([]User, error) {
 	var data []User
 	for rows.Next() {
 		var d User
-		err = rows.Scan(&d.UserId, &d.Username, &d.Email, &d.Description, &d.Avatar)
+		err = rows.Scan(&d.UserId, &d.Username, &d.Email, &d.IsAdmin, &d.Description, &d.Avatar)
 		if err != nil {
 			return nil, fmt.Errorf("unable to scan row: %v", err)
 		}

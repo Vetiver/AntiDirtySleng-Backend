@@ -34,6 +34,5 @@ scenarios:
             url: "/auth/sendMail"
             json:
               name: "dima"
-              group: "BVT"
               email: "vetiverdev@gmail.com"
               password: "228123123123"
