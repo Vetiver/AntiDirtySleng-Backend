@@ -62,6 +62,10 @@ func main() {
 		handler.SendChangeMail(c)
 	})
 
+	r.POST("/changePassword", func(c *gin.Context) {
+		handler.SendChangeMail(c)
+	})
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,
