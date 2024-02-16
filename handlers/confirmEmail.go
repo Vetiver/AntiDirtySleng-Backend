@@ -27,7 +27,7 @@ func generateJWTConfirmEmail(email string) (string, error) {
 	return tokenString, nil
 }
 
-func (h *BaseHandler) sendChangeConfirmationEmail(reqData *db.UserChangePassData) string {
+func (h *BaseHandler) sendChangeConfirmationEmail(reqData *db.UserEmailData) string {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -56,7 +56,7 @@ func (h *BaseHandler) sendChangeConfirmationEmail(reqData *db.UserChangePassData
 }
 
 func (h *BaseHandler) SendChangeMail(c *gin.Context) {
-	var reqData *db.UserChangePassData
+	var reqData *db.UserEmailData
 	if err := c.BindJSON(&reqData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
