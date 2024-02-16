@@ -22,7 +22,7 @@ type User struct {
 	Password    string    `json:"password" binding:"required,min=8"`
 	Description *string   `json:"descriprion"`
 	Avatar      *string   `json:"avatar"`
-	ConfirmCode int
+	ConfirmCode int       `json:"confirmCode"`
 }
 
 type UserLoginData struct {
@@ -34,8 +34,14 @@ type Token struct {
 	TokenString string `json:"accessToken"`
 }
 
-type UserChangePassData struct {
+type UserEmailData struct {
 	Email string `json:"email" binding:"required"`
+}
+
+type UserChangePassData struct {
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {
@@ -50,6 +56,14 @@ func hashPassword(password string) (string, error) {
 		return "", err
 	}
 	return string(hashedPassword), nil
+}
+
+func comparePasswords(hashedPassword, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err == nil {
+		err = fmt.Errorf("пароли совпадают")
+	}
+	return err
 }
 
 func DbStart(baseUrl string) *pgxpool.Pool {
@@ -153,4 +167,45 @@ func (db DB) GetUserInfo(userID uuid.UUID) ([]User, error) {
 		data = append(data, d)
 	}
 	return data, err
+}
+
+func (db DB) ChangePassword(email string, password string) error {
+	exists, err := db.userExistsByEmail(email)
+	if err != nil {
+		return fmt.Errorf("unable to check if user exists: %v", err)
+	}
+	if !exists {
+		return fmt.Errorf("user with email %s does not exist", email)
+	}
+	user, err := db.getUserByEmail(email)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve user data: %v", err)
+	}
+	er := comparePasswords(user.Password, password)
+	if er != nil {
+		return fmt.Errorf("пароли совпадают: %v", er)
+	}
+	_, err = db.pool.Exec(context.Background(), "UPDATE users SET password = $1 WHERE email = $2", password, email)
+	if err != nil {
+		return fmt.Errorf("unable to update password: %v", err)
+	}
+	return nil
+}
+
+func (db DB) userExistsByEmail(email string) (bool, error) {
+	var exists bool
+	err := db.pool.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (db DB) getUserByEmail(email string) (*User, error) {
+	var user User
+	err := db.pool.QueryRow(context.Background(), "SELECT userid, username, email, password, isadmin, description, avatar FROM users WHERE email = $1", email).Scan(&user.UserId, &user.Username, &user.Email, &user.Password, &user.IsAdmin, &user.Description, &user.Avatar)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
