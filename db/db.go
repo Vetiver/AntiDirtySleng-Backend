@@ -15,14 +15,15 @@ type DB struct {
 }
 
 type User struct {
-	UserId      uuid.UUID `json:"id"`
-	Username    string    `json:"name"     binding:"required"`
-	IsAdmin     bool      `json:"isAdmin"`
-	Email       string    `json:"email"    binding:"required"`
-	Password    string    `json:"password" binding:"required,min=8"`
-	Description *string   `json:"descriprion"`
-	Avatar      *string   `json:"avatar"`
-	ConfirmCode int       `json:"confirmCode"`
+	UserId       uuid.UUID `json:"id"`
+	Username     string    `json:"name"     binding:"required"`
+	IsAdmin      bool      `json:"isAdmin"`
+	Email        string    `json:"email"    binding:"required"`
+	Password     string    `json:"password" binding:"required,min=8"`
+	Description  *string   `json:"descriprion"`
+	Avatar       *string   `json:"avatar"`
+	ConfirmCode  int       `json:"confirmCode"`
+	RefreshToken string    `json:"refreshToken"`
 }
 
 type UserLoginData struct {
@@ -42,6 +43,10 @@ type UserChangePassData struct {
 	Token    string `json:"token" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Email    string
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken"`
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {
