@@ -12,9 +12,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func createRefreshToken() (string, error) {
+func createRefreshToken(id uuid.UUID) (string, error) {
 	refreshToken := uuid.New().String()
-	refreshTokenClaims := jwt.MapClaims{"refresh_token": refreshToken}
+	refreshTokenClaims := jwt.MapClaims{
+		"refresh_token": refreshToken,
+		"id":            id,
+	}
 	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
 	refreshTokenString, err := refreshTokenObj.SignedString([]byte(jwtSecret))
 	if err != nil {
@@ -52,7 +55,7 @@ func (h BaseHandler) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
 	}
-	refreshToken, err := createRefreshToken()
+	refreshToken, err := createRefreshToken(user.UserId)
 	if err != nil {
 		log.Printf("Error creating refresh token: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
