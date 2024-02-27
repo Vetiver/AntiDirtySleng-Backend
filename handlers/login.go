@@ -12,6 +12,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func createRefreshToken() (string, error) {
+	refreshToken := uuid.New().String()
+	refreshTokenClaims := jwt.MapClaims{"refresh_token": refreshToken}
+	refreshTokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
+	refreshTokenString, err := refreshTokenObj.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return "", err
+	}
+	return refreshTokenString, nil
+}
+
 func createJWTToken(id uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": id,
@@ -41,6 +52,12 @@ func (h BaseHandler) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid password"})
 		return
 	}
+	refreshToken, err := createRefreshToken()
+	if err != nil {
+		log.Printf("Error creating refresh token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
 	tokenString, err := createJWTToken(user.UserId)
 	if err != nil {
 		log.Printf("Error creating JWT token: %v", err)
@@ -48,5 +65,5 @@ func (h BaseHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString})
+	c.JSON(http.StatusOK, gin.H{"accessToken": tokenString, "refreshToken": refreshToken})
 }
