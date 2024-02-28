@@ -15,14 +15,15 @@ type DB struct {
 }
 
 type User struct {
-	UserId      uuid.UUID `json:"id"`
-	Username    string    `json:"name"     binding:"required"`
-	IsAdmin     bool      `json:"isAdmin"`
-	Email       string    `json:"email"    binding:"required"`
-	Password    string    `json:"password" binding:"required,min=8"`
-	Description *string   `json:"descriprion"`
-	Avatar      *string   `json:"avatar"`
-	ConfirmCode int       `json:"confirmCode"`
+	UserId       uuid.UUID `json:"id"`
+	Username     string    `json:"name"     binding:"required"`
+	IsAdmin      bool      `json:"isAdmin"`
+	Email        string    `json:"email"    binding:"required"`
+	Password     string    `json:"password" binding:"required,min=8"`
+	Description  *string   `json:"descriprion"`
+	Avatar       *string   `json:"avatar"`
+	ConfirmCode  int       `json:"confirmCode"`
+	RefreshToken string    `json:"refreshToken"`
 }
 
 type UserLoginData struct {
@@ -42,6 +43,10 @@ type UserChangePassData struct {
 	Token    string `json:"token" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Email    string
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken"`
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {
@@ -76,27 +81,27 @@ func DbStart(baseUrl string) *pgxpool.Pool {
 	return dbpool
 }
 
-func (db DB) RegisterUser(userData User) (*User, error) {
+func (db DB) RegisterUser(userData User) (string, error) {
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+		return "Проблема с установкой соединения", fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
 	defer conn.Release()
 
 	userData.UserId = uuid.New()
 	password, hashErr := hashPassword(userData.Password)
 	if hashErr != nil {
-		return nil, fmt.Errorf("unable to hashPass: %v", hashErr)
+		return "Проблема с хешированием", fmt.Errorf("unable to hashPass: %v", hashErr)
 	}
 
 	err = conn.QueryRow(context.Background(),
 		`INSERT INTO users(userid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING userid`,
 		userData.UserId, userData.Username, userData.Email, password).Scan(&userData.UserId)
 	if err != nil {
-		return nil, fmt.Errorf("unable to INSERT: %v", err)
+		return "Проблема с запросом в базу данных", fmt.Errorf("unable to INSERT: %v", err)
 	}
 
-	return &userData, nil
+	return "Вы успешно зарегистрировались", nil
 }
 
 func (db DB) GetUserByEmail(email string) (*User, error) {

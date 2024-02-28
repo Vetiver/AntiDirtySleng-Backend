@@ -56,6 +56,9 @@ func main() {
 		v1.POST("/login", func(c *gin.Context) {
 			handler.LoginUser(c)
 		})
+		v1.POST("/refreshToken", func(c *gin.Context) {
+			handler.RefreshToken(c)
+		})
 	}
 
 	r.POST("/confirmEmail", func(c *gin.Context) {
