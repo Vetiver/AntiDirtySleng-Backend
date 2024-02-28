@@ -81,27 +81,27 @@ func DbStart(baseUrl string) *pgxpool.Pool {
 	return dbpool
 }
 
-func (db DB) RegisterUser(userData User) (*User, error) {
+func (db DB) RegisterUser(userData User) (string, error) {
 	conn, err := db.pool.Acquire(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("unable to acquire a database connection: %v", err)
+		return "Проблема с установкой соединения", fmt.Errorf("unable to acquire a database connection: %v", err)
 	}
 	defer conn.Release()
 
 	userData.UserId = uuid.New()
 	password, hashErr := hashPassword(userData.Password)
 	if hashErr != nil {
-		return nil, fmt.Errorf("unable to hashPass: %v", hashErr)
+		return "Проблема с хешированием", fmt.Errorf("unable to hashPass: %v", hashErr)
 	}
 
 	err = conn.QueryRow(context.Background(),
 		`INSERT INTO users(userid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING userid`,
 		userData.UserId, userData.Username, userData.Email, password).Scan(&userData.UserId)
 	if err != nil {
-		return nil, fmt.Errorf("unable to INSERT: %v", err)
+		return "Проблема с запросом в базу данных", fmt.Errorf("unable to INSERT: %v", err)
 	}
 
-	return &userData, nil
+	return "Вы успешно зарегистрировались", nil
 }
 
 func (db DB) GetUserByEmail(email string) (*User, error) {
