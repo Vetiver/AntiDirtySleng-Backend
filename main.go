@@ -66,7 +66,7 @@ func main() {
 	})
 
 	r.POST("/changePassword", func(c *gin.Context) {
-		handler.SendChangeMail(c)
+		handler.ChangePassword(c)
 	})
 
 	srv := &http.Server{
