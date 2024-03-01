@@ -65,10 +65,11 @@ func hashPassword(password string) (string, error) {
 
 func comparePasswords(hashedPassword, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err == nil {
-		err = fmt.Errorf("пароли совпадают")
+	if err != nil {
+		return nil 
 	}
-	return err
+	// Если пароли совпадают, возвращаем ошибку.
+	return fmt.Errorf("пароли совпадают")
 }
 
 func DbStart(baseUrl string) *pgxpool.Pool {
@@ -188,9 +189,13 @@ func (db DB) ChangePassword(email string, password string) error {
 	}
 	er := comparePasswords(user.Password, password)
 	if er != nil {
-		return fmt.Errorf("пароли совпадают: %v", er)
+		return fmt.Errorf("%v", er)
 	}
-	_, err = db.pool.Exec(context.Background(), "UPDATE users SET password = $1 WHERE email = $2", password, email)
+	hashPass, er := hashPassword(password)
+	if er != nil {
+		return fmt.Errorf("%v", err)
+	}
+	_, err = db.pool.Exec(context.Background(), "UPDATE users SET password = $1 WHERE email = $2", hashPass, email)
 	if err != nil {
 		return fmt.Errorf("unable to update password: %v", err)
 	}

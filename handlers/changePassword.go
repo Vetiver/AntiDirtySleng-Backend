@@ -31,16 +31,23 @@ func (h *BaseHandler) ChangePassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	user, err := getEmailFromToken(userData.Token, &userData)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	er := h.db.ChangePassword(user.Email, userData.Password)
 
-	if er != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unexpected error occurred"})
 		return
 	}
 
+	er := h.db.ChangePassword(user.Email, userData.Password)
+
+	if er != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": er.Error()})
+		return
+	}
 }
+
