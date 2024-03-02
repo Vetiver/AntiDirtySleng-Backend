@@ -4,6 +4,8 @@ import (
 	"atnidirtysleng/db"
 	"net/http"
 
+	"time"
+
 	"log"
 
 	"github.com/dgrijalva/jwt-go"
@@ -28,7 +30,8 @@ func createRefreshToken(id uuid.UUID) (string, error) {
 
 func createJWTToken(id uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": id,
+		"id":  id,
+		"exp": time.Now().Add(time.Minute * 20).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(jwtSecret))
