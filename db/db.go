@@ -26,6 +26,12 @@ type User struct {
 	RefreshToken string    `json:"refreshToken"`
 }
 
+type Chat struct {
+	ChatId   uuid.UUID `json:"chatid"	binding:"required"`
+	ChatName string    `json:"chatname"	binding:"required,max=30"`
+	Owner    uuid.UUID `json:"id"		binding:"required"`
+}
+
 type UserLoginData struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -66,7 +72,7 @@ func hashPassword(password string) (string, error) {
 func comparePasswords(hashedPassword, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		return nil 
+		return nil
 	}
 	// Если пароли совпадают, возвращаем ошибку.
 	return fmt.Errorf("пароли совпадают")
@@ -218,4 +224,24 @@ func (db DB) getUserByEmail(email string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (db DB) CreateChat(chat *Chat) error {
+	chat.ChatId = uuid.New()
+
+	_, err := db.pool.Exec(context.Background(), "INSERT INTO chat (chatid, chatName, owner) VALUES ($1, $2, $3)", chat.ChatId, chat.ChatName, chat.Owner)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db DB) AddUserToChat(userID string, chatID uuid.UUID) error {
+	_, err := db.pool.Exec(context.Background(), "INSERT INTO user_chat (userid, chatid) VALUES ($1, $2)", userID, chatID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
