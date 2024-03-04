@@ -30,6 +30,7 @@ type Chat struct {
 	ChatId   uuid.UUID `json:"chatid"	binding:"required"`
 	ChatName string    `json:"chatname"	binding:"required,max=30"`
 	Owner    uuid.UUID `json:"id"		binding:"required"`
+	Users    []string  `json:"users"`
 }
 
 type UserLoginData struct {
