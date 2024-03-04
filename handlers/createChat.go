@@ -29,14 +29,11 @@ func getOwnerFromToken(tokenString string) (string, error) {
 func (h BaseHandler) CreateChat(c *gin.Context) {
 	var chat db.Chat
 
-	// Логируем начало обработки запроса
 	log.Println("Start processing CreateChat handler")
 
-	// Логируем полученное тело запроса
 	log.Println("Received request body:", c.Request.Body)
 
 	if err := c.ShouldBindJSON(&chat); err != nil {
-		// В случае ошибки логируем её и возвращаем ошибку клиенту
 		log.Println("Error binding JSON:", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -66,23 +63,13 @@ func (h BaseHandler) CreateChat(c *gin.Context) {
 		return
 	}
 
-	var users []string
-	if err := c.ShouldBindJSON(&users); err != nil {
-		log.Println("Error binding JSON for users:", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user list"})
+	err = h.db.AddUserToChat(ownerStr, chat.ChatId)
+	if err != nil {
+		log.Println("Error adding user to chat:", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user to chat"})
 		return
 	}
 
-	for _, userID := range users {
-		err := h.db.AddUserToChat(userID, chat.ChatId)
-		if err != nil {
-			log.Println("Error adding user to chat:", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user to chat"})
-			return
-		}
-	}
-
-	// Логируем успешное завершение запроса
 	log.Println("CreateChat handler processed successfully")
 
 	c.JSON(http.StatusOK, gin.H{"message": "Chat created successfully"})
