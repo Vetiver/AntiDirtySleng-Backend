@@ -71,6 +71,15 @@ func (h BaseHandler) CreateChat(c *gin.Context) {
 		chat.Users = append(chat.Users, ownerStr)
 	}
 
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Error occurred while adding users to chat:", r)
+			if err := h.db.DeleteChat(chat.ChatId); err != nil {
+				log.Println("Error deleting chat:", err.Error())
+			}
+		}
+	}()
+
 	err = h.db.CreateChat(&chat)
 	if err != nil {
 		log.Println("Error creating chat:", err.Error())
@@ -81,9 +90,8 @@ func (h BaseHandler) CreateChat(c *gin.Context) {
 	for _, userID := range chat.Users {
 		err := h.db.AddUserToChat(userID, chat.ChatId)
 		if err != nil {
-			log.Println("Error adding user to chat:", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user to chat"})
-			return
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add users"})
+			panic(err)
 		}
 	}
 

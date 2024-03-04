@@ -246,3 +246,12 @@ func (db DB) AddUserToChat(userID string, chatID uuid.UUID) error {
 
 	return nil
 }
+
+func (db DB) DeleteChat(chatID uuid.UUID) error {
+	_, err := db.pool.Exec(context.Background(), "DELETE FROM chat WHERE chatid = $1", chatID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
