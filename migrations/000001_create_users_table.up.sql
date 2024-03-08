@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS users (
     description VARCHAR(255),
     avatar VARCHAR(255)
 );
+
+INSERT INTO users (username, email, password) VALUES ('Попкинс', 'popkins@gmail.com', '12345678');
+INSERT INTO users (username, email, password) VALUES ('Ванька', 'vanek@gmail.com', '12345678');
