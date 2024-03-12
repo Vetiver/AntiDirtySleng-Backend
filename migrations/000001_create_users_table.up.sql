@@ -14,3 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 INSERT INTO users (username, email, password) VALUES ('Попкинс', 'popkins@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
 INSERT INTO users (username, email, password) VALUES ('Ванька', 'vanek@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
+INSERT INTO users (username, email, password) VALUES ('Дима', 'vinek@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
+INSERT INTO users (username, email, password) VALUES ('Тимофей', 'vonek@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
+INSERT INTO users (username, email, password) VALUES ('Санек Морозов', 'sashamoroz0412@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
+INSERT INTO users (username, email, password) VALUES ('Бага', 'vznek@gmail.com', '$2a$10$gSaf3tjZ6jJiS3rP/pGVl.zPJzEaLtrsEavXjYeJ6xzu5GOaeDkRW');--пароль 11111111
