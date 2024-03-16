@@ -56,7 +56,7 @@ func (h *BaseHandler) sendConfirmationEmail(reqData *db.User, code int) (string)
 	m.SetHeader("From", emailAdress)
 	m.SetHeader("To", reqData.Email)
 	m.SetHeader("Subject", "Confirmation Email")
-	m.SetBody("text/html", fmt.Sprintf("Спасибо за регистрацию, вот ваша ссылка на подтверждение: <a href=\"http://localhost:3000/register?code=%d\">http://localhost:8000/register?code=%d</a>", jwtCode, jwtCode))
+	m.SetBody("text/html", fmt.Sprintf("Спасибо за регистрацию, вот ваша ссылка на подтверждение: <a href=\"http://localhost:3000/ru/confirmRegister?code=%v\">http://localhost:3000/ru/confirmRegister?code=%v</a>", jwtCode, jwtCode))
 	h.Code[reqData.Email] = reqData
 	log.Printf("Code for user %s: %d\n", reqData.Email, code)
 	d := gomail.NewDialer(smtpName, port, emailAdress, emailPass)
