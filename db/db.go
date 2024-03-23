@@ -56,6 +56,10 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+type UserChangeUsernameData struct {
+	Username string `json:"name"     binding:"required"`
+}
+
 func NewDB(pool *pgxpool.Pool) *DB {
 	return &DB{
 		pool: pool,
@@ -183,7 +187,7 @@ func (db DB) GetUserInfo(userID uuid.UUID) ([]User, error) {
 }
 
 func (db DB) ChangePassword(email string, password string) error {
-	exists, err := db.userExistsByEmail(email)
+	exists, err := db.UserExistsByEmail(email)
 	if err != nil {
 		return fmt.Errorf("unable to check if user exists: %v", err)
 	}
@@ -209,7 +213,7 @@ func (db DB) ChangePassword(email string, password string) error {
 	return nil
 }
 
-func (db DB) userExistsByEmail(email string) (bool, error) {
+func (db DB) UserExistsByEmail(email string) (bool, error) {
 	var exists bool
 	err := db.pool.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
 	if err != nil {
@@ -244,5 +248,17 @@ func (db DB) AddUserToChat(userID string, chatID uuid.UUID) error {
 		return err
 	}
 
+	return nil
+}
+
+func (db DB) ChangeUsername(userID string, username string) error {
+	_, err := db.pool.Exec(context.Background(), `
+        UPDATE users
+        SET username = $1
+        WHERE userid = $2
+    `, username, userID)
+	if err != nil {
+		return fmt.Errorf("unable to update username: %v", err)
+	}
 	return nil
 }
