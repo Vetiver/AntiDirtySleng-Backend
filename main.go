@@ -86,6 +86,10 @@ func main() {
 		handler.CreateChat(c)
 	})
 
+	r.POST("/changeUsername", func(c *gin.Context) {
+		handler.ChangeUsername(c)
+	})
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,
