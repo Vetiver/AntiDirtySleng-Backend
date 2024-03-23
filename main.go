@@ -42,6 +42,19 @@ func main() {
 	db := db.NewDB(pool)
 	handler := handlers.NewBaseHandler(db)
 	r := gin.Default()
+
+	// Middleware to ignore CORS
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
+		c.Next()
+	})
+
 	r.GET("/getUserInfo", func(c *gin.Context) {
 		handler.GetUserInfo(c)
 	})
