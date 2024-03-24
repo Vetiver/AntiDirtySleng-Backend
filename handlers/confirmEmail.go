@@ -15,6 +15,7 @@ import (
 )
 
 func generateJWTConfirmEmail(email string) (string, error) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 	})

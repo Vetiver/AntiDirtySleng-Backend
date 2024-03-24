@@ -2,12 +2,11 @@ package handlers
 
 import (
 	"atnidirtysleng/db"
-	"github.com/dgrijalva/jwt-go"
 	"os"
 	"sync"
-)
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+	"github.com/dgrijalva/jwt-go"
+)
 
 type UserGet struct {
 	Parce []db.User `json:"parce"`
@@ -27,6 +26,7 @@ func NewBaseHandler(pool *db.DB) *BaseHandler {
 }
 
 func parseToken(tokenString string) (*jwt.Token, error) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
