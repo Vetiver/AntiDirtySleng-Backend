@@ -86,8 +86,8 @@ func main() {
 		handler.CreateChat(c)
 	})
 
-	r.POST("/changeUsername", func(c *gin.Context) {
-		handler.ChangeUsername(c)
+	r.POST("/changeUserData", func(c *gin.Context) {
+		handler.ChangeUserData(c)
 	})
 
 	srv := &http.Server{
