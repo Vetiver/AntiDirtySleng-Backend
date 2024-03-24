@@ -3,6 +3,7 @@ package handlers
 import (
 	"atnidirtysleng/db"
 	"net/http"
+	"os"
 
 	"time"
 
@@ -15,6 +16,7 @@ import (
 )
 
 func createRefreshToken(id uuid.UUID) (string, error) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	refreshToken := uuid.New().String()
 	refreshTokenClaims := jwt.MapClaims{
 		"refresh_token": refreshToken,
@@ -29,6 +31,7 @@ func createRefreshToken(id uuid.UUID) (string, error) {
 }
 
 func createJWTToken(id uuid.UUID) (string, error) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  id,
 		"exp": time.Now().Add(time.Minute * 20).Unix(),

@@ -20,7 +20,7 @@ type User struct {
 	IsAdmin      bool      `json:"isAdmin"`
 	Email        string    `json:"email"    binding:"required"`
 	Password     string    `json:"password" binding:"required,min=8"`
-	Description  *string   `json:"descriprion"`
+	Description  string    `json:"description"`
 	Avatar       *string   `json:"avatar"`
 	ConfirmCode  int       `json:"confirmCode"`
 	RefreshToken string    `json:"refreshToken"`
@@ -54,6 +54,11 @@ type UserChangePassData struct {
 
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refreshToken"`
+}
+
+type UserChangeUserData struct {
+	Username    string `json:"name"     binding:"required,max=30"`
+	Description string `json:"description"`
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {
@@ -183,7 +188,7 @@ func (db DB) GetUserInfo(userID uuid.UUID) ([]User, error) {
 }
 
 func (db DB) ChangePassword(email string, password string) error {
-	exists, err := db.userExistsByEmail(email)
+	exists, err := db.UserExistsByEmail(email)
 	if err != nil {
 		return fmt.Errorf("unable to check if user exists: %v", err)
 	}
@@ -209,7 +214,7 @@ func (db DB) ChangePassword(email string, password string) error {
 	return nil
 }
 
-func (db DB) userExistsByEmail(email string) (bool, error) {
+func (db DB) UserExistsByEmail(email string) (bool, error) {
 	var exists bool
 	err := db.pool.QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
 	if err != nil {
@@ -244,5 +249,17 @@ func (db DB) AddUserToChat(userID string, chatID uuid.UUID) error {
 		return err
 	}
 
+	return nil
+}
+
+func (db DB) ChangeUserData(userID string, username string, description string) error {
+	_, err := db.pool.Exec(context.Background(), `
+        UPDATE users
+        SET username = $1, description = $2
+        WHERE userid = $3
+    `, username, description, userID)
+	if err != nil {
+		return fmt.Errorf("unable to update userData: %v", err)
+	}
 	return nil
 }

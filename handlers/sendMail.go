@@ -1,21 +1,20 @@
 package handlers
 
 import (
-	"fmt"
 	"atnidirtysleng/db"
+	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
 )
-
-
 
 func generateRandomCode() int {
 	rand.NewSource(time.Now().UnixNano())
@@ -23,6 +22,7 @@ func generateRandomCode() int {
 }
 
 func generateJWT(email string, code int) (string, error) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"code":  code,
@@ -36,9 +36,7 @@ func generateJWT(email string, code int) (string, error) {
 	return tokenString, nil
 }
 
-
-
-func (h *BaseHandler) sendConfirmationEmail(reqData *db.User, code int) (string) {
+func (h *BaseHandler) sendConfirmationEmail(reqData *db.User, code int) string {
 	err := godotenv.Load()
 	reqData.ConfirmCode = code
 	if err != nil {
@@ -68,11 +66,9 @@ func (h *BaseHandler) sendConfirmationEmail(reqData *db.User, code int) (string)
 	return jwtCode
 }
 
-
-
 func (h *BaseHandler) SendMail(c *gin.Context) {
 	h.mu.Lock()
-    defer h.mu.Unlock()
+	defer h.mu.Unlock()
 	var reqData *db.User
 	code := generateRandomCode()
 	if err := c.BindJSON(&reqData); err != nil {

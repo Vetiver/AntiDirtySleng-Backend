@@ -4,6 +4,7 @@ import (
 	"atnidirtysleng/db"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ import (
 )
 
 func (h BaseHandler) RefreshToken(c *gin.Context) {
+	var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 	var refreshTokenRequest db.RefreshTokenRequest
 	if err := c.BindJSON(&refreshTokenRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
