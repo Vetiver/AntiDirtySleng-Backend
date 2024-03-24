@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"atnidirtysleng/db"
+	"fmt"
 	"os"
 	"sync"
 
@@ -36,4 +37,18 @@ func parseToken(tokenString string) (*jwt.Token, error) {
 	}
 
 	return token, nil
+}
+
+func getUserIDFromToken(tokenString string) (string, error) {
+	token, err := parseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		id := claims["id"].(string)
+		return id, nil
+	}
+
+	return "", fmt.Errorf("Invalid token")
 }

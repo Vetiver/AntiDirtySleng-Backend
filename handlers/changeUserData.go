@@ -2,28 +2,12 @@ package handlers
 
 import (
 	"atnidirtysleng/db"
-	"fmt"
 	"net/http"
 
 	"log"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
-
-func getUserIDFromToken(tokenString string) (string, error) {
-	token, err := parseToken(tokenString)
-	if err != nil {
-		return "", err
-	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		id := claims["id"].(string)
-		return id, nil
-	}
-
-	return "", fmt.Errorf("Invalid token")
-}
 
 func (h BaseHandler) ChangeUserData(c *gin.Context) {
 	var changeUserDataRequest db.UserChangeUserData
