@@ -20,7 +20,7 @@ type User struct {
 	IsAdmin      bool      `json:"isAdmin"`
 	Email        string    `json:"email"    binding:"required"`
 	Password     string    `json:"password" binding:"required,min=8"`
-	Description  *string   `json:"descriprion"`
+	Description  string    `json:"description"`
 	Avatar       *string   `json:"avatar"`
 	ConfirmCode  int       `json:"confirmCode"`
 	RefreshToken string    `json:"refreshToken"`
@@ -54,6 +54,10 @@ type UserChangePassData struct {
 
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refreshToken"`
+}
+
+type UserChangeDescriptionData struct {
+	Description string `json:"description"`
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {
@@ -244,5 +248,18 @@ func (db DB) AddUserToChat(userID string, chatID uuid.UUID) error {
 		return err
 	}
 
+	return nil
+}
+
+func (db DB) ChangeDescription(userID string, description string) error {
+	_, err := db.pool.Exec(context.Background(), `
+		UPDATE users
+		SET description = $1
+		WHERE userid = $2
+	`, description, userID)
+
+	if err != nil {
+		return fmt.Errorf("unable to update description: %v", err)
+	}
 	return nil
 }
