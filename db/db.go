@@ -57,7 +57,7 @@ type RefreshTokenRequest struct {
 }
 
 type UserChangeUsernameData struct {
-	Username string `json:"name"     binding:"required"`
+	Username string `json:"name"     binding:"required,max=30"`
 }
 
 func NewDB(pool *pgxpool.Pool) *DB {

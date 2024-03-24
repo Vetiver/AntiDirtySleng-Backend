@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	// "regexp"
-
 	"log"
 
 	"github.com/dgrijalva/jwt-go"
@@ -33,18 +31,6 @@ func (h BaseHandler) ChangeUsername(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	if len(changeUsernameRequest.Username) > 30 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Username must be no longer than 30 characters"})
-		return
-	}
-
-	// match, _ := regexp.MatchString("^[а-яА-Яa-zA-Z_]*[a-zA-Zа-яА-Я0-9_]*$", changeUsernameRequest.Username)
-	// if !match {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Username must contain at least one letter and consist only of Russian and English letters, digits and underscore"})
-	// 	return
-	// }
-	// Если раскоммитить эти строчки и импорт, то появится ограничение на входные данные и можно будет писать только рус/анг буквы, цифры и символ "_"
 
 	tokenString := c.GetHeader("Authorization")
 	userID, err := getUserIDFromToken(tokenString)
